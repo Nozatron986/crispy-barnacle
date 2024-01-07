@@ -98,15 +98,13 @@ def games_from_pgn():
     for i in range(len(game_1)):
         if i % 1000 == 0:
             print(i)
-        game_result = game_1[i][-6:-3]
         all_boards = pgn_to_boards(game_1[i])
         board_list = []
         for i in range(len(all_boards)):
             board_list.append(board_to_list(all_boards[i]))
-        result = 1 if game_result == '1-0' else 0
         dataset_game = []
         for i in board_list:
-            dataset_game.append([i, result])
+            dataset_game.append([i, 1 if game_1[i][-6:-3] == '1-0' else 0])
         all_games_dataset.append(dataset_game)
     return all_games_dataset
 
