@@ -43,6 +43,29 @@ def pgn_to_boards(pgn_text):
     return boards
 
 def convert_board(board):
+    fen = ""
+    for row in board:
+        empty_count = 0
+        for piece in row:
+            if piece == ' ':
+                empty_count += 1
+            else:
+                if empty_count > 0:
+                    fen += str(empty_count)
+                    empty_count = 0
+                piece_opposite = piece.lower() if piece.isupper() else piece.upper()
+                fen += piece_opposite
+        if empty_count > 0:
+            fen += str(empty_count)
+        fen += '/'
+
+    # Remove the trailing '/'
+    fen = fen.rstrip('/')
+
+    # Add default information for turn and castling
+    fen += " w KQkq - 0 1"
+
+    return chess.Board(fen)
 
 def games_from_pgn():
     co = 0
@@ -68,7 +91,7 @@ def games_from_pgn():
                 start = True
             co += 1
 
-    #chess_board = pgn_reader.pgn_to_board(game_1[1000])
+    #chess_board = pgn_to_board(game_1[1000])
     #print(board_list)
     #print(game_1[0][-6:-3])
 
@@ -77,7 +100,7 @@ def games_from_pgn():
         if i % 1000 == 0:
             print(i)
         game_result = game_1[i][-6:-3]
-        all_boards = pgn_reader.pgn_to_boards(game_1[i])
+        all_boards = pgn_to_boards(game_1[i])
         board_list = []
         for i in range(len(all_boards)):
             board_list.append(board_to_list(all_boards[i]))
