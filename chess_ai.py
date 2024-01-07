@@ -1,6 +1,5 @@
 import keras
 import numpy as np
-import pgn_reader
 import chess
 import chess.pgn
 import io
