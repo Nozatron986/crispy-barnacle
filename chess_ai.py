@@ -43,56 +43,22 @@ def pgn_to_boards(pgn_text):
     return boards
 
 def convert_board(board):
-    fen = ""
-    for row in board:
-        empty_count = 0
-        for piece in row:
-            if piece == ' ':
-                empty_count += 1
-            else:
-                if empty_count > 0:
-                    fen += str(empty_count)
-                    empty_count = 0
-                piece_opposite = piece.lower() if piece.isupper() else piece.upper()
-                fen += piece_opposite
-        if empty_count > 0:
-            fen += str(empty_count)
-        fen += '/'
-
-    # Remove the trailing '/'
-    fen = fen.rstrip('/')
-
-    # Add default information for turn and castling
-    fen += " w KQkq - 0 1"
-
-    return chess.Board(fen)
 
 def games_from_pgn():
-    all_games_dataset = []
     co = 0
     start = False
     game_1 = []
     c = -1
     with open('lichess_games.pgn') as f:
         for line in f:
-            if co > 5000:
+            if co > 1000:
                 break
             if co % 10000 == 0:
-                print(co*100/2800000, '%')
+                print(co)
             if start:
                 if line[0] != ' ' and line[0] != '[':
                     game_1[c] += line
                 else:
-                    all_boards = pgn_to_boards(game_1[c-1])
-                    #board_list = []
-                    leng = 0
-                    for _ in range(len(all_boards)):
-                        leng += 1
-                        #board_list.append(board_to_list(all_boards[i]))
-                    dataset_game = []
-                    for _ in range(leng):
-                        dataset_game.append([game_1[c-1], 1 if game_1[c-1][-6:-3] == '1-0' else 0])
-                    all_games_dataset.append(dataset_game)
                     start = False
                     #print(game_1[c])
             elif line[0] != ' ' and line[0] != '[':
@@ -105,11 +71,26 @@ def games_from_pgn():
     #chess_board = pgn_reader.pgn_to_board(game_1[1000])
     #print(board_list)
     #print(game_1[0][-6:-3])
-    print(all_games_dataset[0])
+
+    all_games_dataset = []
+    for i in range(len(game_1)):
+        if i % 1000 == 0:
+            print(i)
+        game_result = game_1[i][-6:-3]
+        all_boards = pgn_reader.pgn_to_boards(game_1[i])
+        board_list = []
+        for i in range(len(all_boards)):
+            board_list.append(board_to_list(all_boards[i]))
+        result = 1 if game_result == '1-0' else 0
+        dataset_game = []
+        for i in board_list:
+            dataset_game.append([i, result])
+        all_games_dataset.append(dataset_game)
     return all_games_dataset
 
 def splits():
     training = games_from_pgn()
+    print('???')
 
     Xtrain = []
     Ytrain = []
