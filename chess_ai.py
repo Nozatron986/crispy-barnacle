@@ -3,6 +3,9 @@ import numpy as np
 import chess
 import chess.pgn
 import io
+from datetime import datetime
+
+start_time = datetime.now()
 
 def pgn_to_board(pgn_text):
     board = chess.Board()
@@ -72,15 +75,24 @@ def games_from_pgn():
     game_1 = []
     c = -1
     with open('lichess_games.pgn') as f:
+        all_games_dataset = []
         for line in f:
-            if co > 1000:
+            if c > 2_000:
                 break
-            if co % 10000 == 0:
-                print(co)
+            if c % 1000 == 0:
+                print(c)
             if start:
                 if line[0] != ' ' and line[0] != '[':
                     game_1[c] += line
                 else:
+                    all_boards = pgn_to_boards(game_1[c])
+                    board_list = []
+                    for i in range(len(all_boards)):
+                        board_list.append(board_to_list(all_boards[i]))
+                    dataset_game = []
+                    for i in board_list:
+                        dataset_game.append([i, 1 if game_1[c][-5:-2] == '1-0' else 0])
+                    all_games_dataset.append(dataset_game)
                     start = False
                     #print(game_1[c])
             elif line[0] != ' ' and line[0] != '[':
@@ -93,19 +105,6 @@ def games_from_pgn():
     #chess_board = pgn_to_board(game_1[1000])
     #print(board_list)
     #print(game_1[0][-6:-3])
-
-    all_games_dataset = []
-    for i in range(len(game_1)):
-        if i % 1000 == 0:
-            print(i)
-        all_boards = pgn_to_boards(game_1[i])
-        board_list = []
-        for i in range(len(all_boards)):
-            board_list.append(board_to_list(all_boards[i]))
-        dataset_game = []
-        for i in board_list:
-            dataset_game.append([i, 1 if game_1[i][-6:-3] == '1-0' else 0])
-        all_games_dataset.append(dataset_game)
     return all_games_dataset
 
 def splits():
@@ -208,3 +207,13 @@ Y_train = Y_train[indices]
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 hist = model.fit(X_train, Y_train, epochs=10, validation_split=0.1)
+
+end_time = datetime.now()
+
+# Calculate the time difference
+time_difference = end_time - start_time
+
+# Convert the time difference to milliseconds
+milliseconds = time_difference.total_seconds() * 1000
+
+print(f"Time difference: {milliseconds} milliseconds")
